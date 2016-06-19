@@ -1,0 +1,100 @@
+/**
+* @Author: craigbojko
+* @Date:   2016-04-20T22:40:09+01:00
+* @Last modified by:   craigbojko
+* @Last modified time: 2016-06-19T19:16:54+01:00
+*/
+
+var Promise = require('promise')
+var MapperHAProjects = require('../controllers/mappers/harvestAsanaProjects')
+
+module.exports = {
+  findAsanaProjectsByName: findAsanaProjectsByName,
+  findAsanaProjectsById: findAsanaProjectsById,
+  mapAsanaProjectsByName: mapAsanaProjectsByName
+}
+
+function findAsanaProjectsByName (req, res, next) {
+  if (!isNaN(req.params.name)) {
+    next()
+    return
+  }
+
+  MapperHAProjects.getAsanaProjectByName(req.params.name).then(function (resp) {
+    if (!resp) {
+      res.status(404)
+      res.send({ error: 'Not found' })
+    } else {
+      res.status(200)
+      res.send(resp)
+      console.log('PROJECT FOUND: ', resp)
+    }
+  })
+}
+
+function findAsanaProjectsById (req, res, next) {
+  MapperHAProjects.getAsanaProjectById(req.params.id).then(function (resp) {
+    if (!resp) {
+      res.status(404)
+      res.send({ error: 'Not found' })
+    } else {
+      res.status(200)
+      res.send(resp)
+      console.log('PROJECT FOUND: ', resp)
+    }
+  })
+}
+
+function mapAsanaProjectsByName (req, res, next) {
+  var harvestPromise = function () {
+    return new Promise(function (resolve, reject) {
+      MapperHAProjects.getHarvestProjectByName(req.params.name).then(function (resp) {
+        if (!resp) {
+          reject(resp)
+        } else {
+          resolve(resp)
+        }
+      })
+    })
+  }
+
+  var asanaPromise = function () {
+    return new Promise(function (resolve, reject) {
+      MapperHAProjects.getAsanaProjectByName(req.params.name).then(function (resp) {
+        if (!resp) {
+          reject(resp)
+        } else {
+          resolve(resp)
+        }
+      })
+    })
+  }
+
+  Promise.all([harvestPromise(), asanaPromise()]).then(function (data) {
+    console.log(data)
+    if (req.params.save && req.params.save === 'save' && data[1].length) {
+      var asanaProjectPromises = []
+      for (var i = 0; i < data[1].length; i++) {
+        var projectData = [data[0][0], data[1][i]]
+        console.log('PERSISTING ASANA PROJECT ID: ', data[1][i])
+        asanaProjectPromises.push(MapperHAProjects.persistProjectIdMapping(projectData))
+
+        Promise.all(asanaProjectPromises).then(function (saveData) {
+          res.json(saveData)
+        }, function (err) {
+          console.error(err)
+        })
+      }
+    } else if (data[1].length) {
+      res.json(data)
+    } else {
+      res.json({
+        error: 'No mapping data found',
+        data: data
+      })
+    }
+  }, function (err) {
+    res.status(500)
+    res.send({error: err})
+  })
+}
