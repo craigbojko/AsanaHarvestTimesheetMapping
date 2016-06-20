@@ -1,0 +1,36 @@
+<div ng-if="!dataLoaded">
+  <center>No Data</center>
+</div>
+<div ng-if="results.length>0 && dataLoaded">
+	<center>
+    <ul class="list-unstyled list-group results">
+      <li class="result list-group-item" ng-repeat="result in results">
+        <table class="table table-bordered table-hover">
+          <caption>{{ result.name }}</caption>
+          <tbody>
+            <tr>
+              <td class="col-0-left">
+                <table>
+                  <tbody>
+                    <tr><td class="col-1-left">Street:</td><td>{{result.location.address}}</td></tr>
+                    <tr><td class="col-1-left">City:</td><td>{{result.location.city}}</td></tr>
+                    <tr><td class="col-1-left">State:</td><td>{{result.location.state}}</td></tr>
+                    <tr><td class="col-1-left">Post Code:</td><td>{{result.location.postalCode}}</td></tr>
+                    <tr><td class="col-1-left">Country:</td><td>{{result.location.country}}</td></tr>
+                  </tbody>
+                </table>
+              </td>
+              <td>
+                <table>
+                  <tbody>
+                    <tr><td>URL:</td><td><a href='{{result.url}}'>{{result.url}}</a></td></tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+    </ul>
+  </center>
+</div>
