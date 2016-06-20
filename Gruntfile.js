@@ -1,3 +1,10 @@
+/**
+* @Author: craigbojko
+* @Date:   2016-03-20T20:49:52+00:00
+* @Last modified by:   craigbojko
+* @Last modified time: 2016-06-20T11:04:12+01:00
+*/
+
 var request = require('request')
 
 module.exports = function (grunt) {
@@ -9,9 +16,22 @@ module.exports = function (grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-
+    standard: {
+      extension: {
+        options: {
+          format: false
+        },
+        src: [
+          'src/**/*.js'
+        ]
+      }
+    },
     concurrent: {
-      dev: ['nodemon'],
+      main: [
+        'watch-server',
+        'watch-client',
+        'webpack'
+      ],
       options: {
         logConcurrentOutput: true
       }
@@ -25,26 +45,35 @@ module.exports = function (grunt) {
             PORT: '5100',
             NODE_ENV: 'development'
           },
-          // omit this property if you aren't serving HTML files and
-          // don't want to open a browser tab on start
+          ignore: [
+            '.git',
+            'node_modules/**/node_modules',
+            './build/client',
+            './src/ui/public'
+          ],
+          events: {
+            restart: 'osascript -e "display notification \'App restarted due to:\n\'$FILENAME\'\' with title \'nodemon"'
+          },
+          // watch: [
+          //   './app.js',
+          //   './config/**',
+          //   './routes/**',
+          //   './test/**',
+          //   './src/api/**'
+          // ],
           callback: function (nodemon) {
             nodemon.on('log', function (event) {
               console.log(event.colour)
             })
-
-            // opens browser on initial server start
             nodemon.on('config:update', function () {
-              // Delay before server listens on port
               setTimeout(function () {
                 require('open')('http://localhost:5100')
               }, 1000)
             })
-
-            // refreshes browser when server reboots
             nodemon.on('restart', function () {
-              // Delay before server listens on port
               setTimeout(function () {
-                require('fs').writeFileSync('.rebooted', 'rebooted')
+                console.log('WRITING REBOOTED')
+                require('fs').writeFileSync('.rebooted', new Date().getTime().toString())
               }, 1000)
             })
           }
@@ -53,23 +82,44 @@ module.exports = function (grunt) {
     },
     watch: {
       server: {
-        files: ['.rebooted'],
-        tasks: ['delayed-livereload'],
+        files: [
+          '.rebooted'
+        ],
+        tasks: ['lint'],
+        options: {
+          livereload: false
+        }
+      },
+      client: {
+        files: [
+          '.rebooted', // For server updates
+          './src/ui/**/*.html',
+          './src/ui/**/*.css',
+          './src/ui/js/**',
+          './build/client/**'
+        ],
+        tasks: ['lint', 'delayed-livereload'],
         options: {
           livereload: true
         }
       }
+    },
+    webpack: {
+      dev: require('./webpack.config.js')
     }
   })
 
-  // grunt.config.requires('watch.js.files')
-  // files = grunt.config('watch.js.files')
-  // files = grunt.file.expand(files)
+  grunt.config.requires('watch.client.files')
+  files = grunt.config('watch.client.files')
+  files = grunt.file.expand(files)
 
   grunt.loadNpmTasks('grunt-nodemon')
   grunt.loadNpmTasks('grunt-concurrent')
+  grunt.loadNpmTasks('grunt-standard')
+  grunt.loadNpmTasks('grunt-contrib-watch')
 
   grunt.registerTask('delayed-livereload', 'Live reload after the node server has restarted.', function () {
+    console.log('RUNNING LIVERELOAD')
     var done = this.async()
     setTimeout(function () {
       request.get('http://localhost:' + reloadPort + '/changed?files=' + files.join(','), function (err, res) {
@@ -84,5 +134,9 @@ module.exports = function (grunt) {
     }, 500)
   })
 
-  grunt.registerTask('watch-server', ['concurrent:dev'])
+  grunt.registerTask('lint', ['standard'])
+  grunt.registerTask('watch-server', ['nodemon:dev', 'watch:server'])
+  grunt.registerTask('watch-client', ['watch:client'])
+  grunt.registerTask('develop', ['concurrent:main'])
+  grunt.registerTask('build-client', ['webpack'])
 }
