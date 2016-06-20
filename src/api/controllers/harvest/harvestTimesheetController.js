@@ -2,19 +2,21 @@
 * @Author: craigbojko
 * @Date:   2016-04-03T02:34:07+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-04-05T17:23:07+01:00
+* @Last modified time: 2016-06-19T23:59:42+01:00
 */
 
 var axios = require('axios')
 var hublUrls = require('config/hublUrls')
 var Promise = require('promise')
 
+var HarvestTimesheetModel = require('../../mongo').harvestTimesheets
+
 var timesheetsPersisted = 0
 var timesheetsUpdated = 0
 
 module.exports = {
-  getHarvestTimesheetList: getHarvestTimesheetList // ,
-// persistHarvestTimesheetList: persistHarvestTimesheetList
+  getHarvestTimesheetList: getHarvestTimesheetList,
+  persistHarvestTimesheetList: persistHarvestTimesheetList
 }
 
 function getHarvestTimesheetList (pid, start, end, cb) {
@@ -34,12 +36,12 @@ function getHarvestTimesheetList (pid, start, end, cb) {
     })
 }
 
-function persistHarvestTimesheetList (HarvestTimesheetModel, data, cb) {
+function persistHarvestTimesheetList (data, cb) {
   var promiseArr = []
 
   for (var i = 0; i < data.length; i++) {
     console.log('HARVEST TIMESHEET: %s', data[i].id)
-    promiseArr.push(threadHarvestTimesheetPersistence(data[i], HarvestTimesheetModel))
+    promiseArr.push(threadHarvestTimesheetPersistence(data[i]))
   }
 
   Promise.all(promiseArr).then(function (counts) {
@@ -54,7 +56,7 @@ function persistHarvestTimesheetList (HarvestTimesheetModel, data, cb) {
   })
 }
 
-function threadHarvestTimesheetPersistence (harvestTimesheet, HarvestTimesheetModel) {
+function threadHarvestTimesheetPersistence (harvestTimesheet) {
   return new Promise(function (resolve, reject) {
     HarvestTimesheetModel.findOne({
       $or: [
@@ -66,13 +68,13 @@ function threadHarvestTimesheetPersistence (harvestTimesheet, HarvestTimesheetMo
       if (err) {
         reject(err)
       } else {
-        // persistHarvestTimesheet(doc, harvestTimesheet, HarvestTimesheetModel)
+        // persistHarvestTimesheet(doc, harvestTimesheet)
         if (doc) { // update
           console.log('FOUND HARVEST TIMESHEET: %s', doc.id)
           updateHarvestTimesheet(doc, harvestTimesheet, resolve, reject)
         } else { // save new
           console.log('SAVING HARVEST TIMESHEET: %s', harvestTimesheet.id)
-          insertHarvestTimesheet(harvestTimesheet, HarvestTimesheetModel, resolve, reject)
+          insertHarvestTimesheet(harvestTimesheet, resolve, reject)
         }
       }
     })
@@ -93,7 +95,7 @@ function updateHarvestTimesheet (timesheetDoc, harvestTimesheet, resolve, reject
   })
 }
 
-function insertHarvestTimesheet (harvestTimesheet, HarvestTimesheetModel, resolve, reject) {
+function insertHarvestTimesheet (harvestTimesheet, resolve, reject) {
   HarvestTimesheetModel.create({
     harvest_id: harvestTimesheet.client_id,
     client_id: harvestTimesheet.client_id,
