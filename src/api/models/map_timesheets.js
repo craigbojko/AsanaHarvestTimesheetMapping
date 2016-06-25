@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-03-21T00:02:40+00:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-05-16T00:34:19+01:00
+* @Last modified time: 2016-06-23T11:45:55+01:00
 */
 
 module.exports = function (mongoose) {
@@ -10,9 +10,10 @@ module.exports = function (mongoose) {
   var ObjectId = Schema.ObjectId
 
   var mapsSchema = new Schema({
+    id: ObjectId,
     mapId: ObjectId,
     asanaId: String,
-    id: Number,
+    timesheetId: Number,
     notes: String,
     spent_at: String,
     hours: Number,
