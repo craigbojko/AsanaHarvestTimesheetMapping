@@ -1,13 +1,15 @@
-<div id='container' class=''>
-	<div id='content'>
-    <p>{{title}}</p>
-    <pre>{{resp}}</pre>
-	</div>
+<header>
+  <h1>{{title}}</h1>
+  <p>{{handoff}}</p>
+</header>
+<div id='main'>
+  <div id="angular-app" ng-view="main"></div>
 </div>
 
 <script type='text/javascript'>
   // DEBUG JS SCRIPT -- TODO remove on production
   //
-  var endpoints = {{{endpoints}}}
-  console.log(endpoints)
+  // var endpoints = JSON.parse('{{{handoff}}}').endpoints
 </script>
+
+<script type='text/javascript' src='{{{build}}}client/client.js'></script>
