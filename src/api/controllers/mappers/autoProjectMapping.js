@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-06-23T15:05:25+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-25T19:32:22+01:00
+* @Last modified time: 2016-06-25T20:02:33+01:00
 */
 
 var axios = require('axios')
@@ -13,6 +13,7 @@ var MapProjectModel = require('../../mongo').mapProjectIds
 var MapTimesheetModel = require('../../mongo').mapTimesheets
 
 var MapperHAProjects = require('./harvestAsanaProjects')
+var CommonProjectFunctions = require('./common/getProjects')
 
 module.exports = {
   createJSONProjectIdConfig: mapByProjectIds
@@ -20,7 +21,7 @@ module.exports = {
 
 function mapByProjectIds (harvestId, asanaId) {
   var harvestPromise = new Promise(function (resolve, reject) {
-    MapperHAProjects.getAllHarvestProjects().then(function (resp) {
+    CommonProjectFunctions.getAllHarvestProjects().then(function (resp) {
       if (!resp) {
         reject(resp)
       } else {
@@ -74,7 +75,7 @@ function mapByProjectIds (harvestId, asanaId) {
 
 function threadProjectMap (harvestProject) {
   return new Promise(function (resolve, reject) {
-    MapperHAProjects.getAsanaProjectByName(harvestProject.name).then(function (asanaProjects) {
+    CommonProjectFunctions.getAsanaProjectByName(harvestProject.name).then(function (asanaProjects) {
       resolve({
         harvest: harvestProject,
         asana: asanaProjects

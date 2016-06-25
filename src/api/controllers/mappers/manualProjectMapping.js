@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-06-23T15:05:25+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-23T19:54:31+01:00
+* @Last modified time: 2016-06-25T20:02:26+01:00
 */
 
 var axios = require('axios')
@@ -13,6 +13,7 @@ var MapProjectModel = require('../../mongo').mapProjectIds
 var MapTimesheetModel = require('../../mongo').mapTimesheets
 
 var MapperHAProjects = require('./harvestAsanaProjects')
+var CommonProjectFunctions = require('./common/getProjects')
 
 module.exports = {
   mapManualProjectIds: mapByProjectIds
@@ -20,7 +21,7 @@ module.exports = {
 
 function mapByProjectIds (harvestId, asanaId) {
   var harvestPromise = new Promise(function (resolve, reject) {
-    MapperHAProjects.getHarvestProjectById(harvestId).then(function (resp) {
+    CommonProjectFunctions.getHarvestProjectById(harvestId).then(function (resp) {
       if (!resp) {
         reject(resp)
       } else {
@@ -32,7 +33,7 @@ function mapByProjectIds (harvestId, asanaId) {
   })
 
   var asanaPromise = new Promise(function (resolve, reject) {
-    MapperHAProjects.getAsanaProjectById(asanaId).then(function (resp) {
+    CommonProjectFunctions.getAsanaProjectById(asanaId).then(function (resp) {
       if (!resp) {
         reject(resp)
       } else {

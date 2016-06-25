@@ -2,12 +2,12 @@
 * @Author: craigbojko
 * @Date:   2016-06-25T19:43:29+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-25T19:46:25+01:00
+* @Last modified time: 2016-06-25T20:01:54+01:00
 */
 
 var Promise = require('promise')
 
-var MapProjectModel = require('../../mongo').mapProjectIds
+var MapProjectModel = require('../../../mongo').mapProjectIds
 
 var projectsPersisted = 0
 var projectsUpdated = 0

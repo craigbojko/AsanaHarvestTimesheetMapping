@@ -2,13 +2,15 @@
 * @Author: craigbojko
 * @Date:   2016-04-20T22:40:09+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-24T10:52:43+01:00
+* @Last modified time: 2016-06-25T20:00:23+01:00
 */
 
 var Promise = require('promise')
 var MapperHAProjects = require('../controllers/mappers/harvestAsanaProjects')
 var ManualMapperHAProjects = require('../controllers/mappers/manualProjectMapping')
 var AutoMapperHAProjects = require('../controllers/mappers/autoProjectMapping')
+
+var CommonProjectFunctions = require('../controllers/mappers/common/getProjects')
 
 module.exports = {
   findAsanaProjectsByName: findAsanaProjectsByName,
@@ -43,7 +45,7 @@ function findAsanaProjectsByName (req, res, next) {
     return
   }
 
-  MapperHAProjects.getAsanaProjectByName(req.params.name).then(function (resp) {
+  CommonProjectFunctions.getAsanaProjectByName(req.params.name).then(function (resp) {
     if (!resp) {
       res.status(404)
       res.send({ error: 'Not found' })
@@ -56,7 +58,7 @@ function findAsanaProjectsByName (req, res, next) {
 }
 
 function findAsanaProjectsById (req, res, next) {
-  MapperHAProjects.getAsanaProjectById(req.params.id).then(function (resp) {
+  CommonProjectFunctions.getAsanaProjectById(req.params.id).then(function (resp) {
     if (!resp) {
       res.status(404)
       res.send({ error: 'Not found' })
@@ -71,7 +73,7 @@ function findAsanaProjectsById (req, res, next) {
 function mapAsanaProjectsByName (req, res, next) {
   var harvestPromise = function () {
     return new Promise(function (resolve, reject) {
-      MapperHAProjects.getHarvestProjectByName(req.params.name).then(function (resp) {
+      CommonProjectFunctions.getHarvestProjectByName(req.params.name).then(function (resp) {
         if (!resp) {
           reject(resp)
         } else {
@@ -83,7 +85,7 @@ function mapAsanaProjectsByName (req, res, next) {
 
   var asanaPromise = function () {
     return new Promise(function (resolve, reject) {
-      MapperHAProjects.getAsanaProjectByName(req.params.name).then(function (resp) {
+      CommonProjectFunctions.getAsanaProjectByName(req.params.name).then(function (resp) {
         if (!resp) {
           reject(resp)
         } else {

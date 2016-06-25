@@ -2,12 +2,12 @@
 * @Author: craigbojko
 * @Date:   2016-06-25T19:42:06+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-25T19:43:19+01:00
+* @Last modified time: 2016-06-25T20:01:49+01:00
 */
 
 var Promise = require('promise')
 
-var MapTimesheetModel = require('../../mongo').mapTimesheets
+var MapTimesheetModel = require('../../../mongo').mapTimesheets
 
 var timesheetsPersisted = 0
 var timesheetsUpdated = 0
