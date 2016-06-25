@@ -2,104 +2,52 @@
 * @Author: craigbojko
 * @Date:   2016-04-11T14:23:11+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-25T19:36:05+01:00
+* @Last modified time: 2016-06-25T19:54:22+01:00
 */
 
 var axios = require('axios')
 var Promise = require('promise')
 var hublUrls = require('config/hublUrls')
 
-var TimesheetModel = require('../../mongo').harvestTimesheets
 var MapProjectModel = require('../../mongo').mapProjectIds
-var MapTimesheetModel = require('../../mongo').mapTimesheets
 
-var projectsPersisted = 0
-var projectsUpdated = 0
-var timesheetsPersisted = 0
-var timesheetsUpdated = 0
+var TimesheetPersistance = require('./persist/timesheet')
+var ProjectPersistance = require('./persist/project')
 
 module.exports = {
   mapSystemProjectIds: mapSystemProjectIds,
-  persistProjectIdMapping: persistProjectIdMapping,
-  requestTimsheetFromAsana: requestTimsheetFromAsana,
   mapTaskToTimesheet: mapTaskToTimesheet,
-  persistMappedTimesheet: persistMappedTimesheet
+  requestTimsheetFromAsana: requestTimsheetFromAsana,
+  persistProjectIdMapping: ProjectPersistance.persistProjectIdMapping,
+  persistMappedTimesheet: TimesheetPersistance.persistMappedTimesheet
 }
 
 function mapSystemProjectIds () {
   // TODO - make bulk mapping function
 }
 
-function persistProjectIdMapping (projectData) {
-  return new Promise(function (resolve, reject) {
-    if (projectData.length !== 2 && projectData[0].length && projectData[1].length) {
-      reject({error: "projectData doesn't seem to have enough data"})
-    }
+function mapTaskToTimesheet (data) {
+  var _data = data
+  var timesheetNotes = []
+  var asanaTaskIds = {}
 
-    threadMapProjectPersistence(projectData[1], projectData[0]).then(function (data) {
-      resolve(data)
-    }, function (err) {
-      reject(err)
-    })
-  })
-}
+  for (var i = 0; i < _data.length; i++) {
+    if (data[i].notes) {
+      timesheetNotes.push(data[i].notes)
+      var asanaId = data[i].notes.match(/https?:\/\/app.asana.com\/([0-9a-z].*)\/([0-9a-z].*)/i)
 
-function threadMapProjectPersistence (asanaProject, harvestProject) {
-  return new Promise(function (resolve, reject) {
-    MapProjectModel.findOne({
-      $or: [
-        {
-          'asanaId': asanaProject.id
-        }
-      ]
-    }).exec(function (err, doc) {
-      if (err) {
-        reject(err)
-      } else {
-        if (doc) { // update
-          console.log('FOUND PROJECT MAPPING: %s', doc.asanaId)
-          updateProjectMap(doc, asanaProject, harvestProject, resolve, reject)
-        } else { // save new
-          console.log('SAVING PROJECT MAPPING: %s', harvestProject.harvestId)
-          insertProjectMap(asanaProject, harvestProject, resolve, reject)
+      if (asanaId && asanaId.length > 1) {
+        if (asanaTaskIds[asanaId[2]]) {
+          asanaTaskIds[asanaId[2]].push(_data[i])
+        } else {
+          asanaTaskIds[asanaId[2]] = []
+          asanaTaskIds[asanaId[2]].push(_data[i])
         }
       }
-    })
-  })
-}
-
-function updateProjectMap (projectDoc, asanaProject, harvestProject, resolve, reject) {
-  projectDoc.harvestId = harvestProject.harvest_id
-  projectDoc.clientId = harvestProject.client_id
-  projectDoc.asanaId = asanaProject.id
-  projectDoc.name = asanaProject.name
-  projectDoc.save(function () {
-    projectsUpdated++
-    resolve({
-      projectsUpdated: projectsUpdated,
-      projectsPersisted: projectsPersisted
-    })
-  })
-}
-
-function insertProjectMap (asanaProject, harvestProject, resolve, reject) {
-  MapProjectModel.create({
-    harvestId: harvestProject.harvest_id,
-    clientId: harvestProject.client_id,
-    asanaId: asanaProject.id,
-    name: asanaProject.name
-  }, function (err) {
-    if (err) {
-      console.error('ERROR IN PERSISTING HARVEST PROJECT: %s :: ', harvestProject.id, err)
-      reject(err)
-    } else {
-      projectsPersisted++
-      resolve({
-        projectsUpdated: projectsUpdated,
-        projectsPersisted: projectsPersisted
-      })
     }
-  })
+  }
+
+  return asanaTaskIds
 }
 
 function requestTimsheetFromAsana (date, asanaId) {
@@ -122,11 +70,7 @@ function requestTimsheetFromAsana (date, asanaId) {
 function getHarvestIdFromAsanaId (asanaId) {
   return new Promise(function (resolve, reject) {
     MapProjectModel.findOne({
-      $or: [
-        {
-          'asanaId': asanaId
-        }
-      ]
+      'asanaId': asanaId
     }).exec(function (err, doc) {
       if (err) {
         reject(err)
@@ -158,129 +102,4 @@ function getHarvestTimesheet (pid, start, end, resolve, reject) {
       console.error(error)
       reject(error)
     })
-}
-
-function mapTaskToTimesheet (data) {
-  var _data = data
-  var timesheetNotes = []
-  var asanaTaskIds = {}
-
-  for (var i = 0; i < _data.length; i++) {
-    if (data[i].notes) {
-      timesheetNotes.push(data[i].notes)
-      var asanaId = data[i].notes.match(/https?:\/\/app.asana.com\/([0-9a-z].*)\/([0-9a-z].*)/i)
-
-      if (asanaId && asanaId.length > 1) {
-        if (asanaTaskIds[asanaId[2]]) {
-          asanaTaskIds[asanaId[2]].push(_data[i])
-        } else {
-          asanaTaskIds[asanaId[2]] = []
-          asanaTaskIds[asanaId[2]].push(_data[i])
-        }
-      }
-    }
-  }
-
-  return asanaTaskIds
-}
-
-function persistMappedTimesheet (data, cb) {
-  var promiseArr = []
-  var asanaIds = Object.keys(data)
-
-  for (var i = 0; i < asanaIds.length; i++) {
-    console.log('ASANA TASK: %s', asanaIds[i])
-    for (var j = 0; j < data[asanaIds[i]].length; j++) {
-      var timesheet = data[asanaIds[i]][j]
-      console.log('TIMESHEET: ', timesheet)
-      promiseArr.push(threadTimesheetPersistence(timesheet, asanaIds[i]))
-    }
-  }
-
-  Promise.all(promiseArr).then(function (counts) {
-    console.log('ALL PROMISES COMPLETED: RUNNING CALLBACK')
-    cb({
-      // updated: counts.usersUpdated,
-      // persisted: counts.usersPersisted
-      counts: counts[counts.length - 1]
-    })
-  }, function (error) {
-    console.log(error)
-  })
-}
-
-function threadTimesheetPersistence (timesheet, asanaId) {
-  return new Promise(function (resolve, reject) {
-    MapTimesheetModel.findOne({
-      $and: [
-        {
-          'asanaId': asanaId
-        }, {
-          'timesheetId': timesheet.id
-        }
-      ]
-    }, {_id: 0}).exec(function (err, doc) {
-      if (err) {
-        reject(err)
-      } else {
-        if (doc) { // update
-          console.log('FOUND TIMESHEET: %s', doc.id)
-          updateTimesheet(doc, timesheet, asanaId, resolve, reject)
-        } else { // save new
-          console.log('SAVING TIMESHEET: %s', asanaId)
-          insertTimesheet(timesheet, asanaId, resolve, reject)
-        }
-      }
-    })
-  })
-}
-
-function updateTimesheet (timesheetDoc, timesheet, asanaId, resolve, reject) {
-  timesheetDoc.asanaId = asanaId
-  timesheetDoc.timesheetId = timesheet.id
-  timesheetDoc.notes = timesheet.notes
-  timesheetDoc.spent_at = timesheet.spent_at
-  timesheetDoc.hours = timesheet.hours
-  timesheetDoc.user_id = timesheet.user_id
-  timesheetDoc.project_id = timesheet.project_id
-  timesheetDoc.task_id = timesheet.task_id
-  timesheetDoc.created_at = timesheet.created_at
-  timesheetDoc.updated_at = timesheet.updated_at
-  timesheetDoc.user_department = timesheet.user_department
-  timesheetDoc.task_type = timesheet.task_type
-  timesheetDoc.save(function () {
-    timesheetsUpdated++
-    resolve({
-      timesheetsUpdated: timesheetsUpdated,
-      timesheetsPersisted: timesheetsPersisted
-    })
-  })
-}
-
-function insertTimesheet (timesheet, asanaId, resolve, reject) {
-  MapTimesheetModel.create({
-    asanaId: asanaId,
-    timesheetId: timesheet.id,
-    notes: timesheet.notes,
-    spent_at: timesheet.spent_at,
-    hours: timesheet.hours,
-    user_id: timesheet.user_id,
-    project_id: timesheet.project_id,
-    task_id: timesheet.task_id,
-    created_at: timesheet.created_at,
-    updated_at: timesheet.updated_at,
-    user_department: timesheet.user_department,
-    task_type: timesheet.task_type
-  }, function (err) {
-    if (err) {
-      console.log('ERROR IN PERSISTING TIMESHEET: %s :: ', timesheet.id, err)
-      reject(err)
-    } else {
-      timesheetsPersisted++
-      resolve({
-        timesheetsUpdated: timesheetsUpdated,
-        timesheetsPersisted: timesheetsPersisted
-      })
-    }
-  })
 }
