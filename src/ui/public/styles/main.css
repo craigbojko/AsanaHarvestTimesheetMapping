@@ -2,11 +2,168 @@
 * @Author: craigbojko
 * @Date:   2016-06-20T00:24:18+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-20T01:10:04+01:00
+* @Last modified time: 2016-06-23T16:58:16+01:00
 */
 
-
-
+html,
 body {
-  background: #DDD;
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+
+  font-family: Helvetica;
+  font-size: 12px;
+
+  background: #999999;
+
+  overflow: hidden;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 3px 0px;
+}
+
+p {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+ul.list-unstyled {
+  list-style: none;
+}
+
+pre span.key {
+  color: #e35d51;
+}
+
+#main {
+  height: 100%;
+  overflow: hidden;
+}
+
+#angular-app {
+  display: flex;
+  flex-flow: row;
+  justify-content: auto;
+  align-content: auto;
+  align-items: auto;
+
+  margin: 0px;
+  padding: 0px;
+  min-height: 100%;
+}
+
+#angular-app nav {
+  flex: 1 1 20%;
+  order: 1;
+  align-self: auto;
+  min-width: 0;
+  min-height: auto;
+
+  margin: 0px;
+  padding: 0px;
+
+  border: none;
+  background: #2e343d;
+
+  overflow: scroll;
+}
+
+#angular-app article {
+  flex: 2 1 auto;
+  order: 2;
+  align-self: auto;
+  min-width: 0;
+  min-height: auto;
+
+  margin: 0px;
+  padding: 0px;
+
+  border: none;
+  background: #dddd88;
+  overflow: scroll;
+}
+
+#angular-app aside {
+  flex: 1 6 20%;
+  order: 3;
+  margin: 0px;
+  padding: 5px;
+
+  border: none;
+  background: #ccccff;
+}
+
+header, footer {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 100%;
+  margin: 0px;
+  padding: 5px 15px;
+  min-height: 60px;
+
+  border: none;
+  background: #EFEFEF;
+}
+
+@media all and (max-width: 640px) {
+  #angular-app,
+  #page {
+    flex-direction: column;
+  }
+
+  #angular-app article,
+  #angular-app nav,
+  #angular-app aside {
+    order: 0;
+  }
+
+  #angular-app nav,
+  #angular-app aside,
+  header,
+  footer {
+    min-height: 60px;
+    max-height: 100px;
+    overflow: scroll;
+  }
+}
+
+#angular-app nav .asana-tasks ul {
+  margin: 0px;
+  padding: 0px;
+  list-style: none;
+}
+
+#angular-app nav .asana-tasks ul li {
+  width: 100%;
+  margin: 0px;
+  padding: 15px;
+  text-align: justify;
+  border-bottom: dashed 1px #999;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+#angular-app nav .asana-tasks ul li.selected {
+  background-color: #4a5160;
+}
+
+#angular-app nav .asana-tasks ul li p {
+  font-size: 12px;
+  margin: 0;
+  color: #DDD;
+}
+
+.timesheets-display center,
+.asana-tasks center {
+  margin: 10px;
+  padding: 15px;
+  color: white;
+  font-weight: 100;
+}
+.timesheets-display center {
+  color: #333;
 }

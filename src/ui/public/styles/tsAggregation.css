@@ -1,0 +1,39 @@
+/**
+* @Author: craigbojko
+* @Date:   2016-06-23T13:02:39+01:00
+* @Last modified by:   craigbojko
+* @Last modified time: 2016-06-23T13:32:02+01:00
+*/
+
+
+
+#timesheet-aggregation {
+  width: 100%;
+  min-height: 100px;
+  background-color: #47b28d;
+}
+
+#timesheet-aggregation center {
+  width: 100%;
+  padding: 5px;
+  line-height: 100px;
+  font-size: 14px;
+  font-weight: 100;
+  color: white;
+}
+
+#timesheet-aggregation > div.ng-scope {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 100%;
+  padding: 5px 15px;
+  color: white;
+  font-weight: 100;
+  font-size: 16px;
+}
+
+#timesheet-aggregation > div.ng-scope > div {
+  min-height: 30px;
+  padding: 5px;
+}

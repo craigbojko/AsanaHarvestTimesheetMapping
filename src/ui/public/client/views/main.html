@@ -1,36 +1,49 @@
-<div ng-if="!dataLoaded">
-  <center>No Data</center>
-</div>
-<div ng-if="results.length>0 && dataLoaded">
-	<center>
-    <ul class="list-unstyled list-group results">
-      <li class="result list-group-item" ng-repeat="result in results">
-        <table class="table table-bordered table-hover">
-          <caption>{{ result.name }}</caption>
-          <tbody>
-            <tr>
-              <td class="col-0-left">
-                <table>
-                  <tbody>
-                    <tr><td class="col-1-left">Street:</td><td>{{result.location.address}}</td></tr>
-                    <tr><td class="col-1-left">City:</td><td>{{result.location.city}}</td></tr>
-                    <tr><td class="col-1-left">State:</td><td>{{result.location.state}}</td></tr>
-                    <tr><td class="col-1-left">Post Code:</td><td>{{result.location.postalCode}}</td></tr>
-                    <tr><td class="col-1-left">Country:</td><td>{{result.location.country}}</td></tr>
-                  </tbody>
-                </table>
-              </td>
-              <td>
-                <table>
-                  <tbody>
-                    <tr><td>URL:</td><td><a href='{{result.url}}'>{{result.url}}</a></td></tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </li>
-    </ul>
-  </center>
-</div>
+<nav>
+  <div class="asana-tasks" ng-if="!dataLoaded">
+    <center>No Data</center>
+  </div>
+  <div class="asana-tasks" ng-controller="AsanaTaskController">
+    <div ng-if="asanaTasks.length>0 && dataLoaded">
+      <ul class="list-unstyled list-group tasks">
+        <li
+          ng-repeat="task in asanaTasks"
+          ng-click='loadTaskTimesheets($event, task); select($index)'
+          ng-class="{selected: $index == selected}"
+          class="task list-group-item">
+          <div>
+            <p data-url='{{task.url}}'>
+              {{ task.name }}
+            </p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<article>
+  <div id='timesheet-aggregation' ng-controller="AggregaterController">
+    <center ng-if="!timesheetsLoaded">Select an Asana Task</center>
+    <div ng-if="timesheetsLoaded">
+      <div>
+        <b>Total Time Spent: </b>{{totalTimeSpent}}
+      </div>
+      <div>
+        <b>Time Spent Today: </b>{{timeSpentToday}}
+      </div>
+    </div>
+  </div>
+  <div class="timesheets-display" ng-controller="QueryController">
+    <div ng-if="timesheets.length>0">
+      <ul class="list-unstyled">
+        <li class="timesheet list-group-item" ng-repeat="timesheet in timesheets">
+          <div>
+            <pre ng-bind-html="timesheet"></pre>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div ng-if="timesheets.length===0">
+      <center>No Timesheets Found</center>
+    </div>
+  </div>
+</article>
