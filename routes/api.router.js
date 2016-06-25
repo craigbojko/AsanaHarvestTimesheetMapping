@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-03-20T20:49:52+00:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-19T19:22:07+01:00
+* @Last modified time: 2016-06-24T10:49:08+01:00
 */
 
 require('colors')
@@ -38,6 +38,8 @@ expressAPI.get('/harvest/timesheets/:projectid/:start/:end/:update?', HarvestEnd
 expressAPI.get('/asana/projects/find/:name(\\w+)', MapperEndpoints.findAsanaProjectsByName)
 expressAPI.get('/asana/projects/find/:id(\\d+)', MapperEndpoints.findAsanaProjectsById)
 expressAPI.get('/asana/projects/map/:name/:save?', MapperEndpoints.mapAsanaProjectsByName)
+expressAPI.get('/asana/projects/map/manual/:harvestId/:asanaId', MapperEndpoints.manualMapHAProjects)
+expressAPI.get('/asana/projects/map/auto/project/config', MapperEndpoints.autoMapHAProjects)
 
 expressAPI.get('/asana/projects/:update?', AsanaEndpoints.asanaProjects)
 expressAPI.get('/asana/tasks/get/', AsanaEndpoints.getAsanaProjectTasks)

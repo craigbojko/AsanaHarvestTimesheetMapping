@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-04-11T14:23:11+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-19T19:06:25+01:00
+* @Last modified time: 2016-06-24T11:45:47+01:00
 */
 
 var axios = require('axios')
@@ -13,6 +13,7 @@ var TimesheetModel = require('../../mongo').harvestTimesheets
 var AsanaProjectsModel = require('../../mongo').asanaProjects
 var HarvestProjectsModel = require('../../mongo').harvestProjects
 var MapProjectModel = require('../../mongo').mapProjectIds
+var MapTimesheetModel = require('../../mongo').mapTimesheets
 
 var projectsPersisted = 0
 var projectsUpdated = 0
@@ -21,13 +22,20 @@ var timesheetsUpdated = 0
 
 module.exports = {
   mapSystemProjectIds: mapSystemProjectIds,
-  getAsanaProjectByName: getAsanaProjectByName,
   getAsanaProjectById: getAsanaProjectById,
+  getAsanaProjectByName: getAsanaProjectByName,
+  getHarvestProjectById: getHarvestProjectById,
   getHarvestProjectByName: getHarvestProjectByName,
+  getAllHarvestProjects: getAllHarvestProjects,
+  getAllAsanaProjects: getAllAsanaProjects,
   persistProjectIdMapping: persistProjectIdMapping,
   requestTimsheetFromAsana: requestTimsheetFromAsana,
   mapTaskToTimesheet: mapTaskToTimesheet,
   persistMappedTimesheet: persistMappedTimesheet
+}
+
+function __normalise (name) {
+  return name.toString().replace(/[^A-z0-9]/g, '').toLowerCase()
 }
 
 function mapSystemProjectIds () {
@@ -61,7 +69,7 @@ function threadMapProjectPersistence (asanaProject, harvestProject) {
         reject(err)
       } else {
         if (doc) { // update
-          console.log('FOUND PROJECT MAPPING: %s', doc.id)
+          console.log('FOUND PROJECT MAPPING: %s', doc.asanaId)
           updateProjectMap(doc, asanaProject, harvestProject, resolve, reject)
         } else { // save new
           console.log('SAVING PROJECT MAPPING: %s', harvestProject.harvestId)
@@ -111,7 +119,7 @@ function getHarvestProjectByName (name) {
     HarvestProjectsModel.find({
       $or: [
         {
-          'name': new RegExp('^' + name + '$', 'i')
+          'nameNormal': new RegExp('^' + __normalise(name), 'i')
         }
       ]
     }).exec(function (err, doc) {
@@ -133,7 +141,7 @@ function getAsanaProjectByName (name) {
     AsanaProjectsModel.find({
       $or: [
         {
-          'name': new RegExp('^' + name + '$', 'i')
+          'nameNormal': new RegExp('^' + __normalise(name), 'i')
         }
       ]
     }).exec(function (err, doc) {
@@ -153,11 +161,7 @@ function getAsanaProjectByName (name) {
 function getAsanaProjectById (id) {
   return new Promise(function (resolve, reject) {
     AsanaProjectsModel.findOne({
-      $or: [
-        {
-          'id': id
-        }
-      ]
+      'id': id
     }).exec(function (err, doc) {
       if (err) {
         reject(err)
@@ -165,7 +169,57 @@ function getAsanaProjectById (id) {
         if (doc) {
           resolve(doc)
         } else {
-          reject(null)
+          reject({})
+        }
+      }
+    })
+  })
+}
+
+function getHarvestProjectById (id) {
+  return new Promise(function (resolve, reject) {
+    HarvestProjectsModel.findOne({
+      'harvest_id': id
+    }).exec(function (err, doc) {
+      if (err) {
+        reject(err)
+      } else {
+        if (doc) {
+          resolve(doc)
+        } else {
+          reject({})
+        }
+      }
+    })
+  })
+}
+
+function getAllHarvestProjects () {
+  return new Promise(function (resolve, reject) {
+    HarvestProjectsModel.find({}).exec(function (err, doc) {
+      if (err) {
+        reject(err)
+      } else {
+        if (doc) {
+          resolve(doc)
+        } else {
+          reject({})
+        }
+      }
+    })
+  })
+}
+
+function getAllAsanaProjects () {
+  return new Promise(function (resolve, reject) {
+    AsanaProjectsModel.find({}).exec(function (err, doc) {
+      if (err) {
+        reject(err)
+      } else {
+        if (doc) {
+          resolve(doc)
+        } else {
+          reject({})
         }
       }
     })
@@ -236,11 +290,18 @@ function mapTaskToTimesheet (data) {
   var asanaTaskIds = {}
 
   for (var i = 0; i < _data.length; i++) {
-    timesheetNotes.push(data[i].notes)
-    var asanaId = data[i].notes.match(/https?:\/\/app.asana.com\/([0-9a-z].*)\/([0-9a-z].*)/i)
+    if (data[i].notes) {
+      timesheetNotes.push(data[i].notes)
+      var asanaId = data[i].notes.match(/https?:\/\/app.asana.com\/([0-9a-z].*)\/([0-9a-z].*)/i)
 
-    if (asanaId && asanaId.length > 1) {
-      asanaTaskIds[asanaId[2]] = _data[i]
+      if (asanaId && asanaId.length > 1) {
+        if (asanaTaskIds[asanaId[2]]) {
+          asanaTaskIds[asanaId[2]].push(_data[i])
+        } else {
+          asanaTaskIds[asanaId[2]] = []
+          asanaTaskIds[asanaId[2]].push(_data[i])
+        }
+      }
     }
   }
 
@@ -253,7 +314,11 @@ function persistMappedTimesheet (data, cb) {
 
   for (var i = 0; i < asanaIds.length; i++) {
     console.log('ASANA TASK: %s', asanaIds[i])
-    promiseArr.push(threadTimesheetPersistence(data[asanaIds[i]], asanaIds[i]))
+    for (var j = 0; j < data[asanaIds[i]].length; j++) {
+      var timesheet = data[asanaIds[i]][j]
+      console.log('TIMESHEET: ', timesheet)
+      promiseArr.push(threadTimesheetPersistence(timesheet, asanaIds[i]))
+    }
   }
 
   Promise.all(promiseArr).then(function (counts) {
@@ -264,21 +329,21 @@ function persistMappedTimesheet (data, cb) {
       counts: counts[counts.length - 1]
     })
   }, function (error) {
-    console.error(error)
+    console.log(error)
   })
 }
 
 function threadTimesheetPersistence (timesheet, asanaId) {
   return new Promise(function (resolve, reject) {
-    TimesheetModel.findOne({
+    MapTimesheetModel.findOne({
       $and: [
         {
           'asanaId': asanaId
         }, {
-          'id': timesheet.id
+          'timesheetId': timesheet.id
         }
       ]
-    }).exec(function (err, doc) {
+    }, {_id: 0}).exec(function (err, doc) {
       if (err) {
         reject(err)
       } else {
@@ -296,7 +361,7 @@ function threadTimesheetPersistence (timesheet, asanaId) {
 
 function updateTimesheet (timesheetDoc, timesheet, asanaId, resolve, reject) {
   timesheetDoc.asanaId = asanaId
-  timesheetDoc.id = timesheet.id
+  timesheetDoc.timesheetId = timesheet.id
   timesheetDoc.notes = timesheet.notes
   timesheetDoc.spent_at = timesheet.spent_at
   timesheetDoc.hours = timesheet.hours
@@ -317,9 +382,9 @@ function updateTimesheet (timesheetDoc, timesheet, asanaId, resolve, reject) {
 }
 
 function insertTimesheet (timesheet, asanaId, resolve, reject) {
-  TimesheetModel.create({
+  MapTimesheetModel.create({
     asanaId: asanaId,
-    id: timesheet.id,
+    timesheetId: timesheet.id,
     notes: timesheet.notes,
     spent_at: timesheet.spent_at,
     hours: timesheet.hours,
@@ -332,7 +397,7 @@ function insertTimesheet (timesheet, asanaId, resolve, reject) {
     task_type: timesheet.task_type
   }, function (err) {
     if (err) {
-      console.error('ERROR IN PERSISTING TIMESHEET: %s :: ', timesheet.id, err)
+      console.log('ERROR IN PERSISTING TIMESHEET: %s :: ', timesheet.id, err)
       reject(err)
     } else {
       timesheetsPersisted++

@@ -2,16 +2,39 @@
 * @Author: craigbojko
 * @Date:   2016-04-20T22:40:09+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-19T19:16:54+01:00
+* @Last modified time: 2016-06-24T10:52:43+01:00
 */
 
 var Promise = require('promise')
 var MapperHAProjects = require('../controllers/mappers/harvestAsanaProjects')
+var ManualMapperHAProjects = require('../controllers/mappers/manualProjectMapping')
+var AutoMapperHAProjects = require('../controllers/mappers/autoProjectMapping')
 
 module.exports = {
   findAsanaProjectsByName: findAsanaProjectsByName,
   findAsanaProjectsById: findAsanaProjectsById,
-  mapAsanaProjectsByName: mapAsanaProjectsByName
+  mapAsanaProjectsByName: mapAsanaProjectsByName,
+  manualMapHAProjects: mapProjectsByIdManual,
+  autoMapHAProjects: mapProjectsByIdAuto
+}
+
+function mapProjectsByIdManual (req, res) {
+  ManualMapperHAProjects.mapManualProjectIds(req.params.harvestId, req.params.asanaId).then(function (resp) {
+    res.send(resp)
+  }, function (err) {
+    console.log('ERROR: ', err)
+    res.send(err)
+  })
+}
+
+function mapProjectsByIdAuto (req, res) {
+  // Build config to validate - used later for matching within manual functions
+  AutoMapperHAProjects.createJSONProjectIdConfig().then(function (resp) {
+    res.send(resp)
+  }, function (err) {
+    console.log('ERROR: ', err)
+    res.send(err)
+  })
 }
 
 function findAsanaProjectsByName (req, res, next) {
@@ -79,7 +102,8 @@ function mapAsanaProjectsByName (req, res, next) {
         console.log('PERSISTING ASANA PROJECT ID: ', data[1][i])
         asanaProjectPromises.push(MapperHAProjects.persistProjectIdMapping(projectData))
 
-        Promise.all(asanaProjectPromises).then(function (saveData) {
+        Promise.all(asanaProjectPromises).then(function (saveData) { // TODO - this really shouldnt be in a loop
+          // will only respond with the first mapping
           res.json(saveData)
         }, function (err) {
           console.error(err)
