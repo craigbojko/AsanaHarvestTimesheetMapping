@@ -2,10 +2,10 @@
 * @Author: craigbojko
 * @Date:   2016-03-20T17:04:11+00:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-20T01:05:06+01:00
+* @Last modified time: 2016-06-21T14:25:45+01:00
 */
 
-// var CopyWebpackPlugin = require('copy-webpack-plugin')
+var CopyWebpackPlugin = require('copy-webpack-plugin')
 var webpack = require('webpack')
 
 module.exports = {
@@ -20,15 +20,14 @@ module.exports = {
   watch: true,
   keepalive: true,
   plugins: [
-    new webpack.OldWatchingPlugin() // ,
-  // new CopyWebpackPlugin([
-  //   { from: 'src/manifest.json', to: 'manifest.json' },
-  //   { from: 'src/popup/views/index.html', to: 'pages/index.html' }
-  // ], {
-  //   ignore: [
-  //     { glob: '**/*.psd', dot: true }
-  //   ]
-  // })
+    new webpack.OldWatchingPlugin(),
+    new CopyWebpackPlugin([
+      { from: 'src/ui/public/client/views', to: 'views' }
+    ], {
+      ignore: [
+        { glob: '**/*.psd', dot: true }
+      ]
+    })
   ],
   module: {
     loaders: [

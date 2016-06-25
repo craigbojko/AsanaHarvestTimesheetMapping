@@ -1,7 +1,7 @@
 # @Author: craigbojko
 # @Date:   2016-03-20T17:04:20+00:00
 # @Last modified by:   craigbojko
-# @Last modified time: 2016-06-20T01:01:00+01:00
+# @Last modified time: 2016-06-23T00:12:48+01:00
 
 .PHONY: bootstrap test start build watch;
 
@@ -11,7 +11,6 @@ start:
 	@npm start
 
 listen:
-	#@sudo nodemon --debug ./app.js
 	@grunt develop
 
 debug:

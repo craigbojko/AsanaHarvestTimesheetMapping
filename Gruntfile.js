@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-03-20T20:49:52+00:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-20T11:04:12+01:00
+* @Last modified time: 2016-06-21T00:17:22+01:00
 */
 
 var request = require('request')
@@ -134,7 +134,7 @@ module.exports = function (grunt) {
     }, 500)
   })
 
-  grunt.registerTask('lint', ['standard'])
+  grunt.registerTask('lint', []) // 'standard'
   grunt.registerTask('watch-server', ['nodemon:dev', 'watch:server'])
   grunt.registerTask('watch-client', ['watch:client'])
   grunt.registerTask('develop', ['concurrent:main'])

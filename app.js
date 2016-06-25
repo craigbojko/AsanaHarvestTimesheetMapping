@@ -1,12 +1,13 @@
 /**
  * @Author: craigbojko
  * @Date:   2016-03-20T20:49:52+00:00
-* @Last modified by:   craigbojko
-* @Last modified time: 2016-06-19T20:12:54+01:00
+ * @Last modified by:   craigbojko
+ * @Last modified time: 2016-06-21T15:37:57+01:00
  */
 
 require('app-module-path').addPath(__dirname + '/')
 
+var path = require('path')
 var express = require('express')
 var compress = require('compression')
 var bodyParser = require('body-parser')
@@ -41,6 +42,7 @@ app.use(bodyParser.urlencoded({
 }))
 app.use(bodyParser.json())
 
+app.use('/angular', express.static(path.join(__dirname, './build/client'))) // TODO move to UI Router
 app.use('/', uiRouter)
 app.use('/api', apiRouter) // TODO - check for Qubit IP range for HUBL endpoints
 app.use('/', errorHandlers)
