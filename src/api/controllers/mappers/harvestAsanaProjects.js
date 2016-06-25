@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-04-11T14:23:11+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-24T11:45:47+01:00
+* @Last modified time: 2016-06-25T19:36:05+01:00
 */
 
 var axios = require('axios')
@@ -10,8 +10,6 @@ var Promise = require('promise')
 var hublUrls = require('config/hublUrls')
 
 var TimesheetModel = require('../../mongo').harvestTimesheets
-var AsanaProjectsModel = require('../../mongo').asanaProjects
-var HarvestProjectsModel = require('../../mongo').harvestProjects
 var MapProjectModel = require('../../mongo').mapProjectIds
 var MapTimesheetModel = require('../../mongo').mapTimesheets
 
@@ -22,20 +20,10 @@ var timesheetsUpdated = 0
 
 module.exports = {
   mapSystemProjectIds: mapSystemProjectIds,
-  getAsanaProjectById: getAsanaProjectById,
-  getAsanaProjectByName: getAsanaProjectByName,
-  getHarvestProjectById: getHarvestProjectById,
-  getHarvestProjectByName: getHarvestProjectByName,
-  getAllHarvestProjects: getAllHarvestProjects,
-  getAllAsanaProjects: getAllAsanaProjects,
   persistProjectIdMapping: persistProjectIdMapping,
   requestTimsheetFromAsana: requestTimsheetFromAsana,
   mapTaskToTimesheet: mapTaskToTimesheet,
   persistMappedTimesheet: persistMappedTimesheet
-}
-
-function __normalise (name) {
-  return name.toString().replace(/[^A-z0-9]/g, '').toLowerCase()
 }
 
 function mapSystemProjectIds () {
@@ -111,118 +99,6 @@ function insertProjectMap (asanaProject, harvestProject, resolve, reject) {
         projectsPersisted: projectsPersisted
       })
     }
-  })
-}
-
-function getHarvestProjectByName (name) {
-  return new Promise(function (resolve, reject) {
-    HarvestProjectsModel.find({
-      $or: [
-        {
-          'nameNormal': new RegExp('^' + __normalise(name), 'i')
-        }
-      ]
-    }).exec(function (err, doc) {
-      if (err) {
-        reject(err)
-      } else {
-        if (doc) {
-          resolve(doc)
-        } else {
-          reject(null)
-        }
-      }
-    })
-  })
-}
-
-function getAsanaProjectByName (name) {
-  return new Promise(function (resolve, reject) {
-    AsanaProjectsModel.find({
-      $or: [
-        {
-          'nameNormal': new RegExp('^' + __normalise(name), 'i')
-        }
-      ]
-    }).exec(function (err, doc) {
-      if (err) {
-        reject(err)
-      } else {
-        if (doc) {
-          resolve(doc)
-        } else {
-          reject(null)
-        }
-      }
-    })
-  })
-}
-
-function getAsanaProjectById (id) {
-  return new Promise(function (resolve, reject) {
-    AsanaProjectsModel.findOne({
-      'id': id
-    }).exec(function (err, doc) {
-      if (err) {
-        reject(err)
-      } else {
-        if (doc) {
-          resolve(doc)
-        } else {
-          reject({})
-        }
-      }
-    })
-  })
-}
-
-function getHarvestProjectById (id) {
-  return new Promise(function (resolve, reject) {
-    HarvestProjectsModel.findOne({
-      'harvest_id': id
-    }).exec(function (err, doc) {
-      if (err) {
-        reject(err)
-      } else {
-        if (doc) {
-          resolve(doc)
-        } else {
-          reject({})
-        }
-      }
-    })
-  })
-}
-
-function getAllHarvestProjects () {
-  return new Promise(function (resolve, reject) {
-    HarvestProjectsModel.find({}).exec(function (err, doc) {
-      if (err) {
-        reject(err)
-      } else {
-        if (doc) {
-          resolve(doc)
-        } else {
-          reject({})
-        }
-      }
-    })
-  })
-}
-
-function getAllAsanaProjects () {
-  return new Promise(function (resolve, reject) {
-    AsanaProjectsModel.find({}).exec(function (err, doc) {
-      if (err) {
-        reject(err)
-      } else {
-        if (doc) {
-          resolve(doc)
-        } else {
-          reject({})
-        }
-      }
-    })
   })
 }
 

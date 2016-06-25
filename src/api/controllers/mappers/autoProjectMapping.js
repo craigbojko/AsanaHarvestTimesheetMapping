@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-06-23T15:05:25+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-24T11:20:24+01:00
+* @Last modified time: 2016-06-25T19:32:22+01:00
 */
 
 var axios = require('axios')
@@ -30,18 +30,6 @@ function mapByProjectIds (harvestId, asanaId) {
       resolve(err) // resolve empty
     })
   })
-
-  // var asanaPromise = new Promise(function (resolve, reject) {
-  //   MapperHAProjects.getAllAsanaProjects().then(function (resp) {
-  //     if (!resp) {
-  //       reject(resp)
-  //     } else {
-  //       resolve(resp)
-  //     }
-  //   }, function (err) {
-  //     resolve(err) // resolve empty
-  //   })
-  // })
 
   return new Promise(function (resolve, reject) {
     harvestPromise.then(function (data) {
