@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-04-05T17:46:03+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-19T18:37:56+01:00
+* @Last modified time: 2016-06-24T11:47:17+01:00
 */
 
 var Asana = require('asana')
@@ -16,6 +16,10 @@ var projectsUpdated = 0
 module.exports = {
   getAsanaProjectList: getAsanaProjectList,
   persistAsanaProjects: persistAsanaProjects
+}
+
+function __normalise (name) {
+  return name.toString().replace(/[^A-z0-9]/g, '').toLowerCase()
 }
 
 function getAsanaProjectList (cb) {
@@ -87,6 +91,7 @@ function threadAsanaProjectPersistence (project) {
 function updateAsanaProject (projectDoc, project, resolve, reject) {
   projectDoc.id = project.id
   projectDoc.name = project.name
+  projectDoc.nameNormal = __normalise(project.name)
   projectDoc.save(function () {
     projectsUpdated++
     resolve({
@@ -99,7 +104,8 @@ function updateAsanaProject (projectDoc, project, resolve, reject) {
 function insertAsanaProject (project, resolve, reject) {
   AsanaProjectsModel.create({
     id: project.id,
-    name: project.name
+    name: project.name,
+    nameNormal: __normalise(project.name)
   }, function (err) {
     if (err) {
       console.error('ERROR IN PERSISTING ASANA PROJECT: %s :: ', project.id, err)

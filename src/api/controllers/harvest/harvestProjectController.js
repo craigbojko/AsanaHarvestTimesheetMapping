@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-04-03T02:06:44+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-19T19:12:41+01:00
+* @Last modified time: 2016-06-24T11:38:58+01:00
 */
 
 var axios = require('axios')
@@ -78,6 +78,7 @@ function updateHarvestProject (projectDoc, harvestProject, resolve, reject) {
   projectDoc.harvest_id = harvestProject.id
   projectDoc.client_id = harvestProject.client_id
   projectDoc.name = harvestProject.name
+  projectDoc.nameNormal = __normalise(harvestProject.name)
   projectDoc.created_at = harvestProject.created_at
   projectDoc.save(function () {
     projectsUpdated++
@@ -93,6 +94,7 @@ function insertHarvestProject (harvestProject, resolve, reject) {
     harvest_id: harvestProject.id,
     client_id: harvestProject.client_id,
     name: harvestProject.name,
+    nameNormal: __normalise(harvestProject.name),
     created_at: harvestProject.created_at
   }, function (err) {
     if (err) {
@@ -106,4 +108,8 @@ function insertHarvestProject (harvestProject, resolve, reject) {
       })
     }
   })
+}
+
+function __normalise (name) {
+  return name.toString().replace(/[^A-z0-9]/g, '').toLowerCase()
 }
