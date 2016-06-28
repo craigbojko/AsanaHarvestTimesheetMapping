@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-06-22T23:14:46+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-23T16:38:09+01:00
+* @Last modified time: 2016-06-26T22:08:36+01:00
 */
 
 var $controllerScope
@@ -26,7 +26,7 @@ function requestTimesheetData (task, $http) {
   console.table([task])
   console.groupEnd()
 
-  var url = window.__nodeHandoff.endpoints.queryTimesheets + '/' + task.id
+  var url = window.__nodeHandoff.endpoints.queryTimesheets + '/' + task.projectId + '/' + task.id
   $http.get(url).success(function (data) {
     var timesheets = []
     data.forEach(function (element) {
@@ -34,6 +34,8 @@ function requestTimesheetData (task, $http) {
     })
     $controllerScope.timesheets = timesheets
     $$rootScope.$emit('timesheetsLoaded', data)
+
+    window.__main.setSizeManual()
   })
 }
 

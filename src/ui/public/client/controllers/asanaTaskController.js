@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-06-21T15:42:04+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-23T12:26:18+01:00
+* @Last modified time: 2016-06-26T22:08:52+01:00
 */
 
 var __rootScope
@@ -20,6 +20,7 @@ module.exports = function ($scope, $rootScope, $http) {
     $rootScope.$emit('asanaTasksLoadedEvent', tasks)
     $scope.asanaTasks = tasks
     $scope.dataLoaded = true
+    window.__main.setSizeManual()
   })
 
   $scope.loadTaskTimesheets = execTaskTimesheets

@@ -1,6 +1,6 @@
 <nav>
   <div class="asana-tasks" ng-if="!dataLoaded">
-    <center>No Data</center>
+    <center><img src="{{public}}images/ajax-loader.gif" alt="loading..." /></center>
   </div>
   <div class="asana-tasks" ng-controller="AsanaTaskController">
     <div ng-if="asanaTasks.length>0 && dataLoaded">
