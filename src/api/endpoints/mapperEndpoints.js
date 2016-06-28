@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-04-20T22:40:09+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-25T20:00:23+01:00
+* @Last modified time: 2016-06-25T20:25:47+01:00
 */
 
 var Promise = require('promise')
@@ -16,7 +16,7 @@ module.exports = {
   findAsanaProjectsByName: findAsanaProjectsByName,
   findAsanaProjectsById: findAsanaProjectsById,
   mapAsanaProjectsByName: mapAsanaProjectsByName,
-  manualMapHAProjects: mapProjectsByIdManual,
+  mapAsanaProjectsById: mapProjectsByIdManual,
   autoMapHAProjects: mapProjectsByIdAuto
 }
 
