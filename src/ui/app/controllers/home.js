@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-03-20T20:49:52+00:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-22T23:42:47+01:00
+* @Last modified time: 2016-06-26T21:59:01+01:00
 */
 
 // var base = '../../../'
@@ -25,6 +25,7 @@ function homepage (req, res) {
     build: BUILD_ROUTE,
     handoff: JSON.stringify({
       api: API_ROUTE,
+      public: env + '/projects/Qubit HarvestAsana Mapper/src/ui/public/',
       angularRoute: ANGULAR_ROUTE,
       endpoints: {
         asanaTasks: API_ROUTE + 'asana/tasks/get/filtered',

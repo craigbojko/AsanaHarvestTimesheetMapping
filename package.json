@@ -32,6 +32,7 @@
     "harvest": "^0.1.4",
     "hogan-express": "^0.5.2",
     "html-loader": "^0.4.3",
+    "jquery": "^2.0.0",
     "less-loader": "^2.2.2",
     "mongodb": "^2.1.7",
     "mongoose": "^4.4.8",

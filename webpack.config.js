@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-03-20T17:04:11+00:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-21T14:25:45+01:00
+* @Last modified time: 2016-06-26T15:22:18+01:00
 */
 
 var CopyWebpackPlugin = require('copy-webpack-plugin')
@@ -11,6 +11,7 @@ var webpack = require('webpack')
 module.exports = {
   cache: true,
   entry: {
+    main: './src/ui/public/js/main.js',
     client: './src/ui/public/client/client.js'
   },
   output: {
