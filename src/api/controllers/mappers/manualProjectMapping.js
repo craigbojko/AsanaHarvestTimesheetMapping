@@ -2,15 +2,10 @@
 * @Author: craigbojko
 * @Date:   2016-06-23T15:05:25+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-25T20:02:26+01:00
+* @Last modified time: 2016-06-25T20:24:02+01:00
 */
 
-var axios = require('axios')
 var Promise = require('promise')
-var hublUrls = require('config/hublUrls')
-
-var MapProjectModel = require('../../mongo').mapProjectIds
-var MapTimesheetModel = require('../../mongo').mapTimesheets
 
 var MapperHAProjects = require('./harvestAsanaProjects')
 var CommonProjectFunctions = require('./common/getProjects')

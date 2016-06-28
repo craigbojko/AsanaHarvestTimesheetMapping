@@ -2,7 +2,7 @@
 * @Author: craigbojko
 * @Date:   2016-06-25T19:42:06+01:00
 * @Last modified by:   craigbojko
-* @Last modified time: 2016-06-25T20:01:49+01:00
+* @Last modified time: 2016-06-26T01:10:21+01:00
 */
 
 var Promise = require('promise')
@@ -56,7 +56,7 @@ function threadTimesheetPersistence (timesheet, asanaId) {
         reject(err)
       } else {
         if (doc) { // update
-          console.log('FOUND TIMESHEET: %s', doc.id)
+          console.log('FOUND TIMESHEET: %s', asanaId)
           updateTimesheet(doc, timesheet, asanaId, resolve, reject)
         } else { // save new
           console.log('SAVING TIMESHEET: %s', asanaId)
