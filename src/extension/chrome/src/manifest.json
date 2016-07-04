@@ -1,0 +1,43 @@
+{
+  "manifest_version": 2,
+
+  "name": "Qubit Asana-Timesheet Querier",
+  "description": "Chrome extension for the Qubit-Harvest-Asana Mapping service",
+  "version": "1.0.0",
+
+  "permissions": [
+    "webNavigation",
+    "webRequest",
+    "webRequestBlocking",
+    "tabs",
+    "cookies",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "externally_connectable": {
+    "matches": [
+      "*://*.qubitproducts.com/*",
+      "*://*.qubit.com/*",
+      "*://*.asana.com/*"
+    ]
+  },
+  "web_accessible_resources": [
+    "/content/*.*"
+  ],
+  "content_scripts": [{
+    "matches": [
+      "*://*.asana.com/*"
+    ],
+    "js": [
+      "js/content/qubitATQ.js"
+    ],
+    "run_at": "document_end"
+  }],
+  "browser_action": {
+    "default_icon": {
+
+    },
+    "default_title": "Qubit ATQ - DEVELOPMENT",
+    "default_popup": "/pages/index.html"
+  }
+}
